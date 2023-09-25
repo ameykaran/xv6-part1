@@ -108,3 +108,8 @@ sys_waitx(void)
     return -1;
   return ret;
 }
+
+uint64
+sys_getreadcount(void) {
+    return readcount;
+}
