@@ -133,6 +133,7 @@ UPROGS=\
 	$U/_wc\
 	$U/_zombie\
 	$U/_schedulertest\
+	$U/_getreadcount\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
@@ -140,6 +141,14 @@ fs.img: mkfs/mkfs README $(UPROGS)
 -include kernel/*.d user/*.d
 
 clean: 
+	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
+	*/*.o */*.d */*.asm */*.sym \
+	$U/initcode $U/initcode.out $K/kernel fs.img \
+	mkfs/mkfs .gdbinit \
+        $U/usys.S \
+	$(UPROGS)
+
+all:
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*/*.o */*.d */*.asm */*.sym \
 	$U/initcode $U/initcode.out $K/kernel fs.img \
@@ -164,6 +173,7 @@ QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 qemu: $K/kernel fs.img
 	$(QEMU) $(QEMUOPTS)
+
 
 .gdbinit: .gdbinit.tmpl-riscv
 	sed "s/:1234/:$(GDBPORT)/" < $^ > $@
