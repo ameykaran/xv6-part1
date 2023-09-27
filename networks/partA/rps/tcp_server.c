@@ -17,6 +17,26 @@
     if (buff[len - 1] == '\n')                                                \
         buff[len - 1] = 0;
 
+#define getOutcome(choice1, choice2, result)    \
+    if (choice1[0] == 'p' && choice2[0] == 'r') \
+        result[0] = '1';                        \
+    if (choice1[0] == 'r' && choice2[0] == 'p') \
+        result[0] = '2';                        \
+    if (choice1[0] == 's' && choice2[0] == 'p') \
+        result[0] = '1';                        \
+    if (choice1[0] == 'p' && choice2[0] == 's') \
+        result[0] = '2';                        \
+    if (choice1[0] == 'r' && choice2[0] == 's') \
+        result[0] = '1';                        \
+    if (choice1[0] == 's' && choice2[0] == 'r') \
+        result[0] = '2';                        \
+    if (choice1[0] == 'p' && choice2[0] == 'p') \
+        result[0] = '0';                        \
+    if (choice1[0] == 'r' && choice2[0] == 'r') \
+        result[0] = '0';                        \
+    if (choice1[0] == 's' && choice2[0] == 's') \
+        result[0] = '0';
+
 int main()
 {
     char *ip = "127.0.0.1";
@@ -78,24 +98,7 @@ int main()
 
         // Judgement
         char result[10] = {0};
-        if (choice1[0] == 'r' && choice2[0] == 'p')
-            result[0] = '1';
-        if (choice1[0] == 'p' && choice2[0] == 'r')
-            result[0] = '2';
-        if (choice1[0] == 's' && choice2[0] == 'p')
-            result[0] = '1';
-        if (choice1[0] == 'p' && choice2[0] == 's')
-            result[0] = '2';
-        if (choice1[0] == 'r' && choice2[0] == 's')
-            result[0] = '1';
-        if (choice1[0] == 's' && choice2[0] == 'r')
-            result[0] = '2';
-        if (choice1[0] == 'p' && choice2[0] == 'p')
-            result[0] = '0';
-        if (choice1[0] == 'r' && choice2[0] == 'r')
-            result[0] = '0';
-        if (choice1[0] == 's' && choice2[0] == 's')
-            result[0] = '0';
+        getOutcome(choice1, choice2, result);
 
         printerror(send(client1_sock, result, strlen(result), 0), "Sending judgement to player 1");
         printerror(send(client2_sock, result, strlen(result), 0), "Sending judgement to player 2");
@@ -133,6 +136,7 @@ int main()
 
         printf("\n");
     }
+    close(server_sock);
     close(client1_sock);
     close(client2_sock);
     printf("[-]%s disconnected.\n", pl1_name);

@@ -140,6 +140,8 @@ fs.img: mkfs/mkfs README $(UPROGS)
 
 -include kernel/*.d user/*.d
 
+all: clean
+
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*/*.o */*.d */*.asm */*.sym \
@@ -148,13 +150,13 @@ clean:
         $U/usys.S \
 	$(UPROGS)
 
-all:
-	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	*/*.o */*.d */*.asm */*.sym \
-	$U/initcode $U/initcode.out $K/kernel fs.img \
-	mkfs/mkfs .gdbinit \
-        $U/usys.S \
-	$(UPROGS)
+# all:
+# 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
+# 	*/*.o */*.d */*.asm */*.sym \
+# 	$U/initcode $U/initcode.out $K/kernel fs.img \
+# 	mkfs/mkfs .gdbinit \
+#         $U/usys.S \
+# 	$(UPROGS)
 
 # try to generate a unique GDB port
 GDBPORT = $(shell expr `id -u` % 5000 + 25000)
