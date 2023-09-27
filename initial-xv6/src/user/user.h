@@ -24,6 +24,8 @@ int sleep(int);
 int uptime(void);
 int waitx(int*, int* /*wtime*/, int* /*rtime*/);
 int getreadcount();
+int sigalarm();
+int sigreturn();
 
 // ulib.c
 int stat(const char*, struct stat*);

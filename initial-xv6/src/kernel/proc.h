@@ -119,6 +119,12 @@ struct proc
   uint rtime;                  // How long the process ran for
   uint ctime;                  // When was the process created
   uint etime;                  // When did the process exited
+
+  char sigalarm_running;       // Boolean is sigalarm running
+  int sigalarm_nticks;         // No of ticks before sigalarm is awoken
+  uint64 sigalarm_handler;     // Address of the handler
+  int ticks_elapsed;           // No of ticks that have elapsed
+  struct trapframe* trap_backup;     // Copies the trapframe
 };
 
 extern struct proc proc[NPROC];

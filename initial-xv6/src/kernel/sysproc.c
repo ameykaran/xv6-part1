@@ -111,5 +111,33 @@ sys_waitx(void)
 
 uint64
 sys_getreadcount(void) {
-    return readcount;
+  return readcount;
+}
+
+uint64
+sys_sigalarm(void) {
+  int ticks;
+  uint64 handler;
+  argint(0, &ticks);
+  argaddr(1, &handler);
+
+  if (ticks == -1 || handler == -1) return -1;
+
+  struct proc *p = myproc();
+  p->sigalarm_nticks = ticks;
+  p->sigalarm_handler = handler;
+  p->sigalarm_running = 0;
+  p->ticks_elapsed = 0;
+
+  return 0;
+}
+
+uint64
+sys_sigreturn(void) {
+  struct proc *p = myproc();
+  memmove(p->trapframe, p->trap_backup, sizeof(struct trapframe));
+  if (p->trap_backup) kfree(p->trap_backup);
+  p->trap_backup = 0;
+  p->sigalarm_running = 0;
+  return p->trapframe->a0;
 }

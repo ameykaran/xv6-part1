@@ -152,6 +152,11 @@ found:
   p->rtime = 0;
   p->etime = 0;
   p->ctime = ticks;
+
+  p->ticks_elapsed = 0;
+  p->sigalarm_handler = 0;
+  p->sigalarm_running = 0;
+  p->sigalarm_nticks = 0;
   return p;
 }
 
@@ -175,6 +180,14 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+
+  if (p->trap_backup)
+      kfree(p->trap_backup);
+  p->trapframe = 0;
+  p->sigalarm_nticks = 0;
+  p->sigalarm_running = 0;
+  p->sigalarm_handler = 0;
+
 }
 
 // Create a user page table for a given process, with no user memory,

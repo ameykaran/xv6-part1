@@ -129,11 +129,13 @@ UPROGS=\
 	$U/_sh\
 	$U/_stressfs\
 	$U/_usertests\
+	$U/_alarmtest\
 	$U/_grind\
 	$U/_wc\
 	$U/_zombie\
 	$U/_schedulertest\
 	$U/_getreadcount\
+	$U/_read_test\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
