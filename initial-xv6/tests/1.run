@@ -1,1 +1,1 @@
-cd src; ../../tester/run-xv6-command.exp CPUS=1 Makefile.test getreadcount | grep XV6_TEST_OUTPUT; cd ..
+cd src; ../../tester/run-xv6-command.exp CPUS=1 Makefile.test readtest1 | grep XV6_TEST_OUTPUT; cd ..

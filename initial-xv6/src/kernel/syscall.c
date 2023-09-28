@@ -136,8 +136,6 @@ static uint64 (*syscalls[])(void) = {
 [SYS_sigreturn]     sys_sigreturn,
 };
 
-int readcount = 0;
-
 void
 syscall(void)
 {
@@ -145,8 +143,7 @@ syscall(void)
   struct proc *p = myproc();
 
   num = p->trapframe->a7;
-  if(num == SYS_read)
-    readcount += 1;
+  increment_read_count(num);
 
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // Use num to lookup the system call function for num, call it,

@@ -66,18 +66,21 @@ void usertrap(void)
   }
   else if ((which_dev = devintr()) != 0)
   {
-    if (which_dev == 2) {
+    if (which_dev == 2)
+    {
       p->ticks_elapsed += 1;
-      if (p->sigalarm_nticks > 0 && !p->sigalarm_running) {
-        if (p->ticks_elapsed >= p->sigalarm_nticks) {
+      if (p->sigalarm_nticks > 0 && !p->sigalarm_running)
+      {
+        if (p->ticks_elapsed >= p->sigalarm_nticks)
+        {
           p->sigalarm_running = 1;
           p->ticks_elapsed = 0;
-          p->trap_backup = (struct trapframe*) kalloc();
-          memmove(p->trap_backup, p->trapframe, sizeof(struct trapframe));
+          p->trap_backup = (struct trapframe *)kalloc();
+          *(p->trap_backup) = *(p->trapframe);
           p->trapframe->epc = p->sigalarm_handler;
-          }
         }
-        yield();
+      }
+      yield();
     }
   }
   else

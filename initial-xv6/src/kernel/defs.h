@@ -54,6 +54,12 @@ void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, int, uint64, uint, uint);
 void            itrunc(struct inode*);
 
+// getreadcount.c
+void            readcountinit(void);
+void            increment_read_count(int num);
+int             readcountfunc(void);
+extern struct readcount      readcount;
+
 // ramdisk.c
 void            ramdiskinit(void);
 void            ramdiskintr(void);
@@ -194,4 +200,4 @@ void            update_time(void);
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
 
 // getreadcount.c
-extern int      readcount;
+// extern int      readcount;

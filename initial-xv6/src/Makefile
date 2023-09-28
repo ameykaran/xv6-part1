@@ -28,7 +28,8 @@ OBJS = \
   $K/sysfile.o \
   $K/kernelvec.o \
   $K/plic.o \
-  $K/virtio_disk.o
+  $K/virtio_disk.o \
+  $K/getreadcount.o 
 
 # riscv64-unknown-elf- or riscv64-linux-gnu-
 # perhaps in /opt/riscv/bin
@@ -135,7 +136,8 @@ UPROGS=\
 	$U/_zombie\
 	$U/_schedulertest\
 	$U/_getreadcount\
-	$U/_read_test\
+	$U/_readtest1\
+	$U/_readtest2\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
