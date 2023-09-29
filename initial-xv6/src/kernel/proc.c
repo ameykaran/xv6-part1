@@ -152,6 +152,9 @@ found:
   p->rtime = 0;
   p->etime = 0;
   p->ctime = ticks;
+#ifdef MLFQ
+  p->wtime = 0;
+#endif
 
   p->ticks_elapsed = 0;
   p->sigalarm_handler = 0;
@@ -182,12 +185,11 @@ freeproc(struct proc *p)
   p->state = UNUSED;
 
   if (p->trap_backup)
-      kfree(p->trap_backup);
-  p->trapframe = 0;
+    kfree(p->trap_backup);
+  p->trap_backup = 0;
   p->sigalarm_nticks = 0;
   p->sigalarm_running = 0;
   p->sigalarm_handler = 0;
-
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -477,7 +479,9 @@ void scheduler(void)
   struct cpu *c = mycpu();
 
   c->proc = 0;
-  for (;;)
+
+  // #ifdef RR
+  while (1)
   {
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
@@ -501,6 +505,43 @@ void scheduler(void)
       release(&p->lock);
     }
   }
+#ifdef FCFS
+  // #endif
+  while (1)
+  {
+    intr_on();
+    struct proc *first = {0};
+
+    for (p = proc; p < &proc[NPROC]; p++)
+    {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE)
+      {
+        if (first == 0 || p->ctime < first->ctime)
+        {
+          if (first > 0)
+            release(&first->lock);
+
+          first = p;
+          continue;
+        }
+      }
+      release(&p->lock);
+    }
+
+    p = first;
+    if (p > 0)
+    {
+      intr_off();
+      p->state = RUNNING;
+      c->proc = p;
+
+      swtch(&c->context, &first->context);
+      release(&p->lock);
+      c->proc = 0;
+    }
+  }
+#endif
 }
 
 // Switch to scheduler.  Must hold only p->lock
@@ -778,9 +819,9 @@ void update_time()
   {
     acquire(&p->lock);
     if (p->state == RUNNING)
-    {
       p->rtime++;
-    }
+    else if (p->state == SLEEPING)
+      p->wtime++;
     release(&p->lock);
   }
 }
