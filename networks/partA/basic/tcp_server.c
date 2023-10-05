@@ -28,7 +28,7 @@ int main()
 
     memset(&server_addr, '\0', sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = port;
+    server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(ip);
 
     n = bind(server_sock, (struct sockaddr *)&server_addr, sizeof(server_addr));
