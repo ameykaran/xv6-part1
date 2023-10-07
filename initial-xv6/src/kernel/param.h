@@ -11,3 +11,11 @@
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 #define FSSIZE       2000  // size of file system in blocks
 #define MAXPATH      128   // maximum file path name
+
+// MLFQ constants
+#define MLFQ_NUM_QUEUES 4
+#define MLFQ_TICKS0 1
+#define MLFQ_TICKS1 3
+#define MLFQ_TICKS2 9
+#define MLFQ_TICKS3 15
+#define AGING_TIME 30

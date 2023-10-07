@@ -9,9 +9,9 @@ struct sleeplock;
 struct stat;
 struct superblock;
 
-// #ifdef MLFQ 
+#ifdef MLFQ
 struct mlfq_proc;
-// #endif
+#endif
 
 // bio.c
 void            binit(void);
@@ -80,10 +80,12 @@ void            log_write(struct buf*);
 void            begin_op(void);
 void            end_op(void);
 
-// // mlfq.c
-// #ifdef MLFQ
-void initmlfq(void);
-// #endif
+#ifdef MLFQ
+// mlfq.c
+void            push(struct proc *p, int qnum);
+void            remove(struct proc *p, int qnum);
+struct proc *   topmost(int qnum);
+#endif
 
 // pipe.c
 int             pipealloc(struct file**, struct file**);

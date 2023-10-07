@@ -274,9 +274,7 @@ void userinit(void)
   p->state = RUNNABLE;
 
 #ifdef MLFQ
-  memset(&p->mlfq_data, 0, sizeof(p->mlfq_data));
-  printf("Allocproc\n");
-  enqueue(0, p);
+  push(p, 0);
 #endif
 
   release(&p->lock);
@@ -354,9 +352,7 @@ int fork(void)
   np->state = RUNNABLE;
 
 #ifdef MLFQ
-  memset(&np->mlfq_data, 0, sizeof(np->mlfq_data));
-  printf("Allocproc\n");
-  enqueue(0, np);
+  push(np, 0);
 #endif
 
   release(&np->lock);
@@ -494,13 +490,13 @@ void scheduler(void)
   struct cpu *c = mycpu();
 
   c->proc = 0;
-  // int i = 0;
+
+#ifdef RR
   while (1)
   {
     // Avoid deadlock by ensuring that devices can interrupt.
     intr_on();
 
-#ifdef RR
     for (p = proc; p < &proc[NPROC]; p++)
     {
       acquire(&p->lock);
@@ -519,7 +515,14 @@ void scheduler(void)
       }
       release(&p->lock);
     }
-#elif FCFS
+  }
+#endif
+
+#ifdef FCFS
+  while (1)
+  {
+    // Avoid deadlock by ensuring that devices can interrupt.
+    intr_on();
     struct proc *first = 0;
 
     for (p = proc; p < &proc[NPROC]; p++)
@@ -532,35 +535,32 @@ void scheduler(void)
           if (first > 0)
             release(&first->lock);
 
-          // if (!i)
-          // {
-          //   enqueue(0, p);
-          //   print_mlfq();
-          // }
           first = p;
           continue;
         }
       }
       release(&p->lock);
     }
-    // print_mlfq();
-    // i = 1;
 
     p = first;
     if (p > 0)
     {
+      intr_off();
       p->state = RUNNING;
       c->proc = p;
 
-      swtch(&c->context, &p->context);
+      swtch(&c->context, &first->context);
       release(&p->lock);
       c->proc = 0;
     }
+  }
 #endif
-#ifdef MLFQ
-#define is_in_queue(p) (p->mlfq_data.prev || p->mlfq_data.next)
 
-    // struct proc *first = 0;
+#ifdef MLFQ
+  while (1)
+  {
+    // Avoid deadlock by ensuring that devices can interrupt.
+    intr_on();
 
     for (p = proc; p < &proc[NPROC]; p++)
     {
@@ -569,53 +569,65 @@ void scheduler(void)
 
       acquire(&p->lock);
 
+      // Boost the process
+      if ((ticks - p->mlfq_data.intime) >= AGING_TIME && p->mlfq_data.in_queue && p->state == RUNNABLE)
+      {
+        remove(p, p->mlfq_data.curr_pri);
+        int newpri = max(p->mlfq_data.curr_pri - 1, 0);
+#ifdef DEBUG
+        printf("promoting %d to %d\n", p->pid, newpri);
+#endif
+        // p->mlfq_data.num_ticks = 0;
+        push(p, newpri);
+
+        release(&p->lock);
+        continue;
+      }
+
       // The process is ready to be run but not in the queue
-      if (p->state == RUNNABLE && !is_in_queue(p))
-        enqueue(p->mlfq_data.curr_pri, p);
+      if (p->state == RUNNABLE && !p->mlfq_data.in_queue)
+        push(p, p->mlfq_data.curr_pri);
 
       if (p->state == ZOMBIE || p->state == SLEEPING)
-        remove_proc(p, p->mlfq_data.curr_pri);
-
-      // Boost the process
-      if (p->mlfq_data.wtime > AGING_TIME && is_in_queue(p))
-      {
-        remove_proc(p, p->mlfq_data.curr_pri);
-        int newpri = max(p->mlfq_data.curr_pri - 1, 0);
-        printf("promoting %d to %d\n", p->pid, newpri);
-        p->mlfq_data.curr_pri = newpri;
-        enqueue(newpri, p);
-      }
+        remove(p, p->mlfq_data.curr_pri);
       release(&p->lock);
     }
 
-    struct proc *next_proc = topmost_proc();
-    if (next_proc)
-      printf("Top process is %d\n\n", next_proc->pid);
+    struct proc *next = 0;
+    for (int i = 0; i < MLFQ_NUM_QUEUES; i++)
+    {
+      next = topmost(i);
+      if (next)
+        break;
+    }
+
+#ifdef DEBUG
+    if (next)
+      printf("Top process is %d\n\n", next->pid);
+#endif
     c->proc = 0;
 
-    if (!next_proc)
+    if (!next)
     {
+#ifdef DEBUG
       printf("No process in queue\n");
+#endif
       continue;
     }
-    acquire(&next_proc->lock);
-    printf("reher\n");
-    int next_pri = next_proc->mlfq_data.curr_pri;
-    next_proc->mlfq_data.numran[next_pri] += 1;
+    acquire(&next->lock);
+    int next_pri = next->mlfq_data.curr_pri;
+    next->mlfq_data.numran[next_pri] += 1;
 
-    next_proc->state = RUNNING;
-    c->proc = next_proc;
+    next->state = RUNNING;
+    c->proc = next;
 
-    swtch(&c->context, &next_proc->context);
-    printf("reher\n");
-    release(&next_proc->lock);
-    // mlfq_update();
-    printf("state - %d\n", next_proc->state);
-    printf("reher\n");
+    intr_off();
+    swtch(&c->context, &next->context);
+    release(&next->lock);
 
     c->proc = 0;
-#endif
   }
+#endif
 }
 
 // Switch to scheduler.  Must hold only p->lock
@@ -895,10 +907,14 @@ void update_time()
     if (p->state == RUNNING)
     {
       p->rtime += 1;
+#ifdef MLFQ
       p->mlfq_data.num_ticks += 1;
+#endif
     }
-    else if (p->state == SLEEPING)
+#ifdef MLFQ
+    else if (p->state == SLEEPING || p->state == RUNNABLE)
       p->mlfq_data.wtime += 1;
+#endif
     release(&p->lock);
   }
 }

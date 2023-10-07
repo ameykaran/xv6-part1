@@ -74,11 +74,14 @@ CFLAGS += -fno-pie -nopie
 endif
 
 ifndef SCHEDULER
-# SCHEDULER := FCFS
-SCHEDULER := MLFQ
+SCHEDULER := RR
 endif
+
+# ifdef TEST
+# CFLAGS += -D MLFQ_TEST
+# endif
+
 CFLAGS += -D $(SCHEDULER)
-# CFLAGS += -D MLFQ
 
 LDFLAGS = -z max-page-size=4096
 

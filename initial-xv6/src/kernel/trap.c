@@ -89,7 +89,54 @@ void usertrap(void)
 #endif
 
 #ifdef MLFQ
-      mlfq_upgrade(which_dev);
+      if (which_dev == 2 && p && p->state == RUNNING)
+      {
+        int time;
+        switch (p->mlfq_data.curr_pri)
+        {
+        default:
+        case 0:
+          time = MLFQ_TICKS0;
+          break;
+        case 1:
+          time = MLFQ_TICKS1;
+          break;
+        case 2:
+          time = MLFQ_TICKS2;
+          break;
+        case 3:
+          time = MLFQ_TICKS3;
+          break;
+        }
+
+        if (p->mlfq_data.num_ticks >= time)
+        {
+          int new_pri = min(p->mlfq_data.curr_pri + 1, MLFQ_NUM_QUEUES - 1);
+          remove(p, p->mlfq_data.curr_pri);
+#ifdef DEBUG
+          printf("demoting %d to %d\n", p->pid, new_pri);
+#endif
+          push(p, new_pri);
+          yield();
+        }
+      }
+      int flag = 0;
+      for (int i = 0; i < p->mlfq_data.curr_pri; i++)
+      {
+        for (struct proc *p = proc; p < &proc[NPROC]; p++)
+        {
+          if (p->state == RUNNABLE && p->mlfq_data.in_queue && p->mlfq_data.curr_pri == i)
+          {
+            flag = 1;
+            break;
+          }
+        }
+        if (flag)
+          break;
+      }
+      if (flag)
+        yield();
+
 #endif
     }
   }
@@ -189,9 +236,59 @@ void kerneltrap()
 #endif
 
 #ifdef MLFQ
-      mlfq_upgrade(which_dev);
-#endif
+  struct proc *p = myproc();
+  if (!p)
+    goto cont;
+  if (which_dev == 2 && p && p->state == RUNNING)
+  {
+    int time;
+    switch (p->mlfq_data.curr_pri)
+    {
+    default:
+    case 0:
+      time = MLFQ_TICKS0;
+      break;
+    case 1:
+      time = MLFQ_TICKS1;
+      break;
+    case 2:
+      time = MLFQ_TICKS2;
+      break;
+    case 3:
+      time = MLFQ_TICKS3;
+      break;
+    }
 
+    if (p->mlfq_data.num_ticks >= time)
+    {
+      int new_pri = min(p->mlfq_data.curr_pri + 1, MLFQ_NUM_QUEUES - 1);
+      remove(p, p->mlfq_data.curr_pri);
+#ifdef DEBUG
+      printf("demoting %d to %d\n", p->pid, new_pri);
+#endif
+      push(p, new_pri);
+      yield();
+    }
+  }
+  int flag = 0;
+  for (int i = 0; i < p->mlfq_data.curr_pri; i++)
+  {
+    for (struct proc *p = proc; p < &proc[NPROC]; p++)
+    {
+      if (p->state == RUNNABLE && p->mlfq_data.in_queue && p->mlfq_data.curr_pri == i)
+      {
+        flag = 1;
+        break;
+      }
+    }
+    if (flag)
+      break;
+  }
+  if (flag)
+    yield();
+
+cont:
+#endif
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
   w_sepc(sepc);
@@ -203,11 +300,12 @@ void clockintr()
   acquire(&tickslock);
   ticks++;
   update_time();
-// #ifdef MLFQ
-//   mlfq_update();
-// #endif
   wakeup(&ticks);
   release(&tickslock);
+
+#ifdef MLFQ_TEST
+  print_mlfq();
+#endif
 }
 
 // check if it's an external interrupt or software interrupt,

@@ -30,11 +30,7 @@ main()
     virtio_disk_init(); // emulated hard disk
     userinit();      // first user process
     readcountinit(); // initialise the read counter
-    initmlfq();      // initialise mlfq
 
-// #ifdef MLFQ
-//     initmlfq() ;
-// #endif
     __sync_synchronize();
     started = 1;
   } else {

@@ -92,17 +92,17 @@ enum procstate
   ZOMBIE
 };
 
-
+#ifdef MLFQ
 struct mlfq_proc
 {
-  // struct proc* curr_proc;
   int curr_pri;
-  struct proc *prev, *next;
   int numran[MLFQ_NUM_QUEUES];
   uint wtime;
   uint num_ticks;
+  char in_queue;
+  uint intime;
 };
-
+#endif
 
 // Per-process state
 struct proc
@@ -139,10 +139,10 @@ struct proc
   int ticks_elapsed;             // No of ticks that have elapsed
   struct trapframe *trap_backup; // Copy of the trapframe
 
-// for MLFQ
-// #ifdef MLFQ
+#ifdef MLFQ
+  // for MLFQ
   struct mlfq_proc mlfq_data; // Info used by the mlfq scheduler
-// #endif
+#endif
 };
 
 extern struct proc proc[NPROC];
