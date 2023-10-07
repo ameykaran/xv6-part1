@@ -11,6 +11,7 @@
 #include <fcntl.h>
 
 // PACKETSIZE = DATASIZE + SEQSIZE
+#define PORT 5600
 #define PACKETSIZE 128
 #define DATASIZE 120
 #define SEQSIZE 8
