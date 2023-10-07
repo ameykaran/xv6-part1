@@ -89,6 +89,31 @@ void usertrap(void)
 #endif
 
 #ifdef MLFQ
+      for (struct proc *p = proc; p < &proc[NPROC]; p++)
+      {
+        if (!p)
+          continue;
+
+        acquire(&p->lock);
+
+        // Boost the process
+        if ((ticks - p->mlfq_data.intime) >= AGING_TIME && p->mlfq_data.in_queue && p->state == RUNNABLE)
+        {
+          remove(p, p->mlfq_data.curr_pri);
+          int newpri = max(p->mlfq_data.curr_pri - 1, 0);
+#ifdef DEBUG
+          printf("promoting %d to %d\n", p->pid, newpri);
+#endif
+          // p->mlfq_data.num_ticks = 0;
+          push(p, newpri);
+
+          release(&p->lock);
+          continue;
+        }
+
+        release(&p->lock);
+      }
+
       if (which_dev == 2 && p && p->state == RUNNING)
       {
         int time;
@@ -236,6 +261,30 @@ void kerneltrap()
 #endif
 
 #ifdef MLFQ
+  for (struct proc *p = proc; p < &proc[NPROC]; p++)
+  {
+    if (!p)
+      continue;
+
+    acquire(&p->lock);
+
+    // Boost the process
+    if ((ticks - p->mlfq_data.intime) >= AGING_TIME && p->mlfq_data.in_queue && p->state == RUNNABLE)
+    {
+      remove(p, p->mlfq_data.curr_pri);
+      int newpri = max(p->mlfq_data.curr_pri - 1, 0);
+#ifdef DEBUG
+      printf("promoting %d to %d\n", p->pid, newpri);
+#endif
+      // p->mlfq_data.num_ticks = 0;
+      push(p, newpri);
+
+      release(&p->lock);
+      continue;
+    }
+    release(&p->lock);
+  }
+
   struct proc *p = myproc();
   if (!p)
     goto cont;

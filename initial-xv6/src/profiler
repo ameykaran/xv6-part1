@@ -1,11 +1,11 @@
-RR   - 1 cpu wtime  9 rtime 137
-RR   - 1 cpu wtime 10 rtime 141
-FCFS - 1 cpu wtime  9 rtime 119
-FCFS - 1 cpu wtime 11 rtime 122
-FCFS - 3 cpu wtime 11 rtime 115  without yield
-FCFS - 3 cpu wtime  8 rtime 110  with yield
-FCFS - 3 cpu wtime 10 rtime 112  with yield
+RR   - 1 cpu rtime  9 wtime 137
+RR   - 1 cpu rtime 10 wtime 141
+FCFS - 1 cpu rtime  9 wtime 119
+FCFS - 1 cpu rtime 11 wtime 122
+FCFS - 3 cpu rtime 11 wtime 115  without yield
+FCFS - 3 cpu rtime  8 wtime 110  with yield
+FCFS - 3 cpu rtime 10 wtime 112  with yield
 
-RR   - 1 cpu wtime  9 rtime 137
-FCFS - 3 cpu wtime 10 rtime 104  without yield
-MLFQ - 1 cpu wtime  9 rtime 133  with yield
+RR   - 1 cpu rtime  9 wtime 137
+FCFS - 3 cpu rtime 10 wtime 104  without yield
+MLFQ - 1 cpu rtime  9 wtime 133  with yield

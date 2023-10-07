@@ -96,7 +96,6 @@ enum procstate
 struct mlfq_proc
 {
   int curr_pri;
-  int numran[MLFQ_NUM_QUEUES];
   uint wtime;
   uint num_ticks;
   char in_queue;

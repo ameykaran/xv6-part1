@@ -35,7 +35,7 @@ minproc = min(process_data.keys())
 mintime = process_data[minproc]["time"][0]-1
 
 for i in range(5):
-    del process_data[minproc + i]
+    del process_data[minproc+i]
 
 for item in process_data:
     for j in range(len(process_data[item]["time"])):
@@ -44,7 +44,7 @@ for item in process_data:
 # Create a multiline graph
 plt.figure(figsize=(10, 6))
 for process_id, data in process_data.items():
-    process_id = process_id - minproc
+    process_id = int(process_id) - minproc - 5
     plt.plot(data['time'], data['qno'], label=f'Proc {process_id}')
 
 plt.xlabel('No. of ticks elapsed')

@@ -615,8 +615,6 @@ void scheduler(void)
       continue;
     }
     acquire(&next->lock);
-    int next_pri = next->mlfq_data.curr_pri;
-    next->mlfq_data.numran[next_pri] += 1;
 
     next->state = RUNNING;
     c->proc = next;
