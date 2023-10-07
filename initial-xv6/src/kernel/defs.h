@@ -9,6 +9,10 @@ struct sleeplock;
 struct stat;
 struct superblock;
 
+// #ifdef MLFQ 
+struct mlfq_proc;
+// #endif
+
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
@@ -75,6 +79,11 @@ void            initlog(int, struct superblock*);
 void            log_write(struct buf*);
 void            begin_op(void);
 void            end_op(void);
+
+// // mlfq.c
+// #ifdef MLFQ
+void initmlfq(void);
+// #endif
 
 // pipe.c
 int             pipealloc(struct file**, struct file**);
@@ -198,6 +207,3 @@ void            update_time(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
-
-// getreadcount.c
-// extern int      readcount;

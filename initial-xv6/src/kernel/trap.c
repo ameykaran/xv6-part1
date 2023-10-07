@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "mlfq.h"
 
 struct spinlock tickslock;
 uint ticks;
@@ -66,6 +67,7 @@ void usertrap(void)
   }
   else if ((which_dev = devintr()) != 0)
   {
+    // give up the CPU if this is a timer interrupt.
     if (which_dev == 2)
     {
       p->ticks_elapsed += 1;
@@ -80,7 +82,15 @@ void usertrap(void)
           p->trapframe->epc = p->sigalarm_handler;
         }
       }
+#ifndef FCFS
+#ifndef MLFQ
       yield();
+#endif
+#endif
+
+#ifdef MLFQ
+      mlfq_upgrade(which_dev);
+#endif
     }
   }
   else
@@ -93,9 +103,13 @@ void usertrap(void)
   if (killed(p))
     exit(-1);
 
+#ifndef FCFS
+#ifndef MLFQ
   // give up the CPU if this is a timer interrupt.
   if (which_dev == 2)
     yield();
+#endif
+#endif
 
   usertrapret();
 }
@@ -166,9 +180,17 @@ void kerneltrap()
     panic("kerneltrap");
   }
 
-  // give up the CPU if this is a timer interrupt.
+// give up the CPU if this is a timer interrupt.
+#ifndef FCFS
+#ifndef MLFQ
   if (which_dev == 2 && myproc() != 0 && myproc()->state == RUNNING)
     yield();
+#endif
+#endif
+
+#ifdef MLFQ
+      mlfq_upgrade(which_dev);
+#endif
 
   // the yield() may have caused some traps to occur,
   // so restore trap registers for use by kernelvec.S's sepc instruction.
@@ -181,20 +203,9 @@ void clockintr()
   acquire(&tickslock);
   ticks++;
   update_time();
-  // for (struct proc *p = proc; p < &proc[NPROC]; p++)
-  // {
-  //   acquire(&p->lock);
-  //   if (p->state == RUNNING)
-  //   {
-  //     printf("here");
-  //     p->rtime++;
-  //   }
-  //   // if (p->state == SLEEPING)
-  //   // {
-  //   //   p->wtime++;
-  //   // }
-  //   release(&p->lock);
-  // }
+// #ifdef MLFQ
+//   mlfq_update();
+// #endif
   wakeup(&ticks);
   release(&tickslock);
 }

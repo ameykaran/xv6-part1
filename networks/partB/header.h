@@ -10,9 +10,10 @@
 #include <time.h>
 #include <fcntl.h>
 
+// PACKETSIZE = DATASIZE + SEQSIZE
 #define PACKETSIZE 128
 #define DATASIZE 120
-#define SEQSIZE 120
+#define SEQSIZE 8
 #define MAXPACKETS 256
 #define TIME_BETWEEN_PACKETS 1
 #define TIME_WAIT 3

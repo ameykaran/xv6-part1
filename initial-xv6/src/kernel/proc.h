@@ -92,6 +92,18 @@ enum procstate
   ZOMBIE
 };
 
+
+struct mlfq_proc
+{
+  // struct proc* curr_proc;
+  int curr_pri;
+  struct proc *prev, *next;
+  int numran[MLFQ_NUM_QUEUES];
+  uint wtime;
+  uint num_ticks;
+};
+
+
 // Per-process state
 struct proc
 {
@@ -121,17 +133,16 @@ struct proc
   uint etime;                  // When did the process exited
 
   // for sigalarm and sigreturn
-  char sigalarm_running;           // Boolean is sigalarm running
-  int sigalarm_nticks;             // No of ticks before sigalarm is awoken
-  uint64 sigalarm_handler;         // Address of the handler
-  int ticks_elapsed;               // No of ticks that have elapsed
-  struct trapframe* trap_backup;   // Copy of the trapframe
+  char sigalarm_running;         // Boolean is sigalarm running
+  int sigalarm_nticks;           // No of ticks before sigalarm is awoken
+  uint64 sigalarm_handler;       // Address of the handler
+  int ticks_elapsed;             // No of ticks that have elapsed
+  struct trapframe *trap_backup; // Copy of the trapframe
 
-
-  // for MLFQ
-  uint wtime;                  // How long the process waited for
-
-
+// for MLFQ
+// #ifdef MLFQ
+  struct mlfq_proc mlfq_data; // Info used by the mlfq scheduler
+// #endif
 };
 
 extern struct proc proc[NPROC];

@@ -1,0 +1,7 @@
+RR   - 1 cpu wtime  9 rtime 137
+RR   - 1 cpu wtime 10 rtime 141
+FCFS - 1 cpu wtime  9 rtime 119
+FCFS - 1 cpu wtime 11 rtime 122
+FCFS - 3 cpu wtime 11 rtime 115  without yield
+FCFS - 3 cpu wtime  8 rtime 110  with yield
+FCFS - 3 cpu wtime 10 rtime 112  with yield
