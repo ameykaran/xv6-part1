@@ -6,7 +6,7 @@ This document describes the implementation of the specifications as mentioned in
 - Modified Makefile to take argument which then defines a macro with the compiler to identify the scheduling policy
 
 ### FCFS Policy
-- Have checked the `ctime` variable in the `struct proc` which stores the time a process was created.
+- Have created the `ctime` variable in the `struct proc` which stores the time a process was created.
 - We then find the process with the least `ctime` and schedule it 
 
 
@@ -37,5 +37,5 @@ Below is a graph that depicts the changes a process goes through as it is schedu
 
 Note that IO bound processes aren't included as they remain in queue 0 for the entire time.
 
-![Loading mlfq analysis](mlfq.png "MLFQ Analysis")
+![Loading mlfq analysis](./initial-xv6/mlfq.png "MLFQ Analysis")
 

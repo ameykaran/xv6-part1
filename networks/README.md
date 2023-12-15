@@ -1,1 +1,0 @@
-For the UDP implementation, we assume that the clients always reply in the order they connected to the server.
